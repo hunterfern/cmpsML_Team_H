@@ -1,0 +1,71 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# Data Files (too large to commit)
+INPUT/TRAIN/*.csv
+INPUT/TEST/*.csv
+!INPUT/TRAIN/.gitkeep
+!INPUT/TEST/.gitkeep
+
+# Generated Outputs (recreatable)
+OUTPUT/charts/*.png
+OUTPUT/charts/*.jpg
+OUTPUT/metrics/*.csv
+OUTPUT/predictions/*.csv
+!OUTPUT/charts/.gitkeep
+!OUTPUT/metrics/.gitkeep
+!OUTPUT/predictions/.gitkeep
+
+# Trained Models (large files)
+MODEL/ann/*.h5
+MODEL/ann/*.pkl
+MODEL/svm/*.pkl
+MODEL/knn/*.pkl
+MODEL/dt/*.pkl
+!MODEL/ann/.gitkeep
+!MODEL/svm/.gitkeep
+!MODEL/knn/.gitkeep
+!MODEL/dt/.gitkeep
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Environment variables
+.env
+.env.local
