@@ -3,7 +3,6 @@ from config import TRAIN_DIR, DATA_FILE, OUTPUT_DIR
 
 # Column names from datset documentation
 COLUMN_NAMES = [
-    "poisonous",
     "cap-shape",
     "cap-surface",
     "cap-color",
@@ -26,7 +25,7 @@ COLUMN_NAMES = [
     "spore-print-color",
     "population",
     "habitat",
-
+    "poisonous"
 ]
 
 def load_training_data():
