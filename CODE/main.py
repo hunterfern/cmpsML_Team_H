@@ -44,7 +44,7 @@ def main():
     # Odor vs class
     plt.figure()
     sns.countplot(x=raw_df["odor"], hue=raw_df["poisonous"])
-    plt.title("Odor vs Poisonous")
+    plt.title("Odor vs Class")
     plt.xticks(rotation=45)
     plt.show()
 
