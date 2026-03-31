@@ -38,7 +38,7 @@ def main():
 
     # Class distribution
     sns.countplot(x=raw_df["poisonous"])
-    plt.title("Poisonous vs Edible Mushrooms")
+    plt.title("Class Distributions")
     plt.show()
 
     # Odor vs class
