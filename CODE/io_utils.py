@@ -30,14 +30,12 @@ COLUMN_NAMES = [
 ]
 
 def load_training_data():
-    # Load mushroom dataset from train folder
     file_path = TRAIN_DIR / DATA_FILE
 
-    df = pd.read_csv(
-        file_path,
-        header=None,
-        names=COLUMN_NAMES
-        )
+    df = pd.read_csv(file_path)
+    print("Loaded dataset shape:", df.shape)
+    df.columns = COLUMN_NAMES
+
     return df
 
 def save_dataframe_to_excel(df, file_name):
