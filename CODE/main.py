@@ -33,5 +33,20 @@ def main():
 
     print("Preprocessing complete. Raw and preprocessed datasets saved to OUTPUT folder.")
 
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    # Class distribution
+    sns.countplot(x=raw_df["poisonous"])
+    plt.title("Poisonous vs Edible Mushrooms")
+    plt.show()
+
+    # Odor vs class
+    plt.figure()
+    sns.countplot(x=raw_df["odor"], hue=raw_df["poisonous"])
+    plt.title("Odor vs Poisonous")
+    plt.xticks(rotation=45)
+    plt.show()
+
 if __name__ == "__main__":
     main()
