@@ -46,28 +46,24 @@ def main():
     print("Feature extraction complete. Extracted data saved to OUTPUT/extracted_features.xlsx")
 
     # Plots
+    import pandas as pd
     import matplotlib.pyplot as plt
     import seaborn as sns
+    from sklearn.feature_selection import mutual_info_classif
 
     # Readable class labels
     class_labels = raw_df["poisonous"].replace({"e": "Edible", "p": "Poisonous"})
+    extracted_df['Class'] = class_labels.values
 
     # Readable odor labels
     odor_labels = raw_df["odor"].replace({
-        "a": "Almond",
-        "l": "Anise",
-        "c": "Creosote",
-        "y": "Fishy",
-        "f": "Foul",
-        "m": "Musty",
-        "n": "None",
-        "p": "Pungent",
-        "s": "Spicy"
+        "a": "Almond", "l": "Anise", "c": "Creosote", "y": "Fishy",
+        "f": "Foul", "m": "Musty", "n": "None", "p": "Pungent", "s": "Spicy"
     })
 
     # Class distribution
     plt.figure(figsize=(8,5))
-    sns.countplot(x=class_labels, order=["Edible", "Poisonous"])
+    sns.countplot(x=class_labels, order=["Edible", "Poisonous"], palette=["#2ca02c", "#d62728"])
     plt.title("Class Distributions")
     plt.xlabel("Mushroom Class")
     plt.ylabel("Count")
@@ -77,8 +73,8 @@ def main():
 
     # Odor vs class
     plt.figure(figsize=(10,6))
-    order = odor_labels.value_counts().index
-    sns.countplot(x=odor_labels, hue=class_labels, order=order, palette=["#d62728", "#2ca02c"])
+    odor_order = odor_labels.value_counts().index
+    sns.countplot(x=odor_labels, hue=class_labels, order=odor_order, palette=["#2ca02c", "#d62728"])
     plt.title("Distribution of Odor by Class")
     plt.xlabel("Odor")
     plt.ylabel("Count")
@@ -88,43 +84,63 @@ def main():
     plt.savefig(FIGURE_DIR / "odor_vs_class.png")
     plt.show()
 
-    # Correlation heatmap
-    numeric_df = extracted_df.select_dtypes(include='number')
-    plt.figure(figsize=(16, 12))
-    corr = numeric_df.corr()
-    sns.heatmap(corr, cmap="coolwarm", center=0, annot=False, linewidths=0.3, square=True, 
-                cbar_kws={"shrink": 0.8})
-    plt.title("Feature Correlation Heatmap After Feature Extraction")
-    plt.tight_layout()
-    plt.savefig(FIGURE_DIR / "feature_correlation_heatmap.png")
-    plt.show()
-
-    odor_freq_map = raw_df['odor'].value_counts(normalize=True)
-    extracted_df['odor_freq'] = raw_df['odor'].map(odor_freq_map).values
-
-    # Violin plot - Odor Frequency by Class
-    extracted_df['class_labels'] = class_labels.values
+    # Gill color frequency
     plt.figure(figsize=(8, 5))
-    sns.violinplot(data=extracted_df, x="class_labels", y="odor_freq", hue="class_labels", palette=["#2ca02c", "#d62728"], legend=False)
-    plt.title("Odor Frequency by Class")
-    plt.xlabel("Mushroom Class")
-    plt.ylabel("Odor Frequency")
+    sns.violinplot(data=extracted_df, x="Class", y="gill_color_freq", hue="Class", palette=["#2ca02c", "#d62728"], inner="stick", legend=False)
+    plt.title("Gill Color Frequency by Class")
     plt.tight_layout()
-    plt.savefig(FIGURE_DIR / "odor_freq_by_class.png")
+    plt.savefig(FIGURE_DIR / "gill_color_freq.png")
     plt.show()
 
-
-    # Distribution of Odor Frequency by Class
+    # Spore print frequency
     plt.figure(figsize=(8, 5))
-    sns.histplot(data=extracted_df, x="odor_freq", hue=class_labels, kde=True, bins=25, 
-                 palette=["#2ca02c", "#d62728"], multiple="stack")
-    plt.title("Distribution of Odor Frequency by Class")
-    plt.xlabel("Odor Frequency")
-    plt.ylabel("Count")
+    sns.violinplot(data=extracted_df, x="Class", y="spore_print_freq", hue="Class", palette=["#2ca02c", "#d62728"], inner="stick", legend=False)
+    plt.title("Spore Print Frequency by Class")
     plt.tight_layout()
-    plt.savefig(FIGURE_DIR / "odor_freq_distribution.png")
+    plt.savefig(FIGURE_DIR / "spore_print_freq.png")
     plt.show()
-    plt.close()
+
+    # Bruises no odor interaction
+    plt.figure(figsize=(8, 5))
+    sns.countplot(data=extracted_df, x="bruises_no_odor", hue="Class", palette=["#2ca02c", "#d62728"])
+    plt.title("Bruises with No Odor Interaction")
+    plt.tight_layout()
+    plt.savefig(FIGURE_DIR / "bruises_no_odor.png")
+    plt.show()
+
+    # Suspicious spore/gill combination
+    plt.figure(figsize=(8, 5))
+    sns.countplot(data=extracted_df, x="suspicious_spore_gill", hue="Class", palette=["#2ca02c", "#d62728"])
+    plt.title("Suspicious Spore/Gill Combination")
+    plt.tight_layout()
+    plt.savefig(FIGURE_DIR / "suspicious_combo.png")
+    plt.show()
+
+    # Stalk root missing
+    if 'stalk_root_missing' in extracted_df.columns:
+        plt.figure(figsize=(8, 5))
+        sns.countplot(data=extracted_df, x="stalk_root_missing", hue="Class", palette=["#2ca02c", "#d62728"])
+        plt.title("Stalk Root Missing by Class")
+        plt.tight_layout()
+        plt.savefig(FIGURE_DIR / "stalk_root_missing.png")
+        plt.show()
+
+    # Feature impact analysis
+    target_binary = raw_df["poisonous"].map({"e": 0, "p": 1})
+    new_cols = ['odor_freq', 'gill_color_freq', 'spore_print_freq', 'bruises_no_odor', 'suspicious_spore_gill', 'stalk_root_missing']
+    existing_cols = [c for c in new_cols if c in extracted_df.columns]
+    
+    mi_scores = mutual_info_classif(extracted_df[existing_cols], target_binary, random_state=42)
+    mi_results = pd.Series(mi_scores, index=existing_cols).sort_values()
+
+    plt.figure(figsize=(10, 6))
+    mi_results.plot(kind='barh', color='teal')
+    plt.title("Predictive Power of Extracted Features")
+    plt.xlabel("Information Gain Score")
+    plt.tight_layout()
+    plt.savefig(FIGURE_DIR / "feature_impact.png")
+    plt.show()
+
 
     print("All plots saved to figures folder.")
 
