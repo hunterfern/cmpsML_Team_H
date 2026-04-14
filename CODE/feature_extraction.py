@@ -36,7 +36,7 @@ def extract_features(preprocessed_df):
         extracted_df['suspicious_spore_gill'] = (extracted_df[odor_none_cols[0]] * extracted_df[spore_risk_cols].max(axis=1)).astype(int)
     
     # 4. Stalk root missing
-    stalk_missing_cols = [col for col in extracted_df.columns if 'stalk-root' in col and 'missing' in col.lower()]
+    stalk_missing_cols = [col for col in extracted_df.columns if 'stalk-root' in col and ('missing' in col.lower() or '?' in col or 'nan' in col.lower())]
     if stalk_missing_cols:
         extracted_df['stalk_root_missing'] = extracted_df[stalk_missing_cols[0]]
     

@@ -124,6 +124,8 @@ def main():
         plt.tight_layout()
         plt.savefig(FIGURE_DIR / "stalk_root_missing.png")
         plt.show()
+    
+        
 
     # Feature impact analysis
     target_binary = raw_df["poisonous"].map({"e": 0, "p": 1})
