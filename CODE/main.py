@@ -7,6 +7,18 @@ from config import (
     PROCESSED_DATA_OUTPUT_FILE,
     FIGURE_DIR
 )
+from models.ann_model import train_ann_model
+from models.svm_model import train_svm_model
+from models.dt_model import train_dt_model
+from models.knn_model import train_knn_model
+from sklearn.model_selection import train_test_split
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.feature_selection import mutual_info_classif
+from evaluation import evaluate_sklearn_model, evaluate_ann_model, generate_comparison_report
+
+
 
 def main():
      # Load raw dataset
@@ -69,7 +81,7 @@ def main():
     plt.ylabel("Count")
     plt.tight_layout()
     plt.savefig(FIGURE_DIR / "class_distribution.png")
-    plt.show()
+    plt.close()
 
     # Odor vs class
     plt.figure(figsize=(10,6))
@@ -82,7 +94,7 @@ def main():
     plt.legend(title="Class")
     plt.tight_layout()
     plt.savefig(FIGURE_DIR / "odor_vs_class.png")
-    plt.show()
+    plt.close()
 
     # Gill color frequency
     plt.figure(figsize=(8, 5))
@@ -90,7 +102,7 @@ def main():
     plt.title("Gill Color Frequency by Class")
     plt.tight_layout()
     plt.savefig(FIGURE_DIR / "gill_color_freq.png")
-    plt.show()
+    plt.close()
 
     # Spore print frequency
     plt.figure(figsize=(8, 5))
@@ -98,7 +110,7 @@ def main():
     plt.title("Spore Print Frequency by Class")
     plt.tight_layout()
     plt.savefig(FIGURE_DIR / "spore_print_freq.png")
-    plt.show()
+    plt.close()
 
     # Bruises no odor interaction
     plt.figure(figsize=(8, 5))
@@ -106,7 +118,7 @@ def main():
     plt.title("Bruises with No Odor Interaction")
     plt.tight_layout()
     plt.savefig(FIGURE_DIR / "bruises_no_odor.png")
-    plt.show()
+    plt.close()
 
     # Suspicious spore/gill combination
     plt.figure(figsize=(8, 5))
@@ -114,7 +126,7 @@ def main():
     plt.title("Suspicious Spore/Gill Combination")
     plt.tight_layout()
     plt.savefig(FIGURE_DIR / "suspicious_combo.png")
-    plt.show()
+    plt.close()
 
     # Stalk root missing
     if 'stalk_root_missing' in extracted_df.columns:
@@ -123,7 +135,7 @@ def main():
         plt.title("Stalk Root Missing by Class")
         plt.tight_layout()
         plt.savefig(FIGURE_DIR / "stalk_root_missing.png")
-        plt.show()
+        plt.close()
     
         
 
@@ -141,10 +153,52 @@ def main():
     plt.xlabel("Information Gain Score")
     plt.tight_layout()
     plt.savefig(FIGURE_DIR / "feature_impact.png")
-    plt.show()
+    plt.close()
 
 
     print("All plots saved to figures folder.")
+
+    # Prepare data for models
+    X = encoded_features
+    y = encoded_target
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+    print("Train size:", X_train.shape, "| Test size:", X_test.shape)
+
+    # Train all 4 models
+    print("\nTraining ANN model...")
+    ann_model, ann_acc = train_ann_model(X, y)
+
+    print("\nTraining DT model...")
+    dt_model, dt_acc = train_dt_model(X, y)
+
+    print("\nTraining KNN model...")
+    knn_model, knn_acc = train_knn_model(X, y)
+
+    print("\nTraining SVM model...")
+    svm_model, svm_acc = train_svm_model(X, y)
+
+    print("\nAll models trained.")
+    print(f"   ANN Accuracy: {ann_acc:.4f}")
+    print(f"   DT Accuracy:  {dt_acc:.4f}")
+    print(f"   KNN Accuracy: {knn_acc:.4f}")
+    print(f"   SVM Accuracy: {svm_acc:.4f}")
+
+    # Model Assessment
+    print("\nRunning model assessment...")
+    results = []
+
+    results.append(evaluate_ann_model(ann_model, X_test, y_test))
+    results.append(evaluate_sklearn_model(dt_model, X_train, X_test, y_train, y_test, "Decision Tree"))
+    results.append(evaluate_sklearn_model(knn_model, X_train, X_test, y_train, y_test, "KNN"))
+    results.append(evaluate_sklearn_model(svm_model, X_train, X_test, y_train, y_test, "SVM"))
+
+    generate_comparison_report(results)
+
+    print("\nDone! Check DOC/figures/ and OUTPUT/metrics/ for results.")
+
 
 if __name__ == "__main__":
     main()
